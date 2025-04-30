@@ -1,0 +1,51 @@
+version: '3.8'  # Define a versão do Docker Compose a ser usada.
+
+services:  # Define os serviços que compõem a aplicação.
+
+  db:  # Serviço para o banco de dados PostgreSQL.
+    build:
+      context: ./db  # Especifica o diretório onde está o Dockerfile do PostgreSQL.
+    environment:  # Define variáveis de ambiente para configurar o PostgreSQL.
+      POSTGRES_USER: postgres  # Nome do usuário do banco de dados.
+      POSTGRES_PASSWORD: minhasenhasecreta  # Senha do usuário do banco de dados.
+      POSTGRES_DB: northwind  # Nome do banco de dados que será criado.
+    volumes:
+      - db_data:/var/lib/postgresql/data  # Monta um volume para persistir os dados do banco.
+    networks:
+      - observability-network  # Conecta o serviço à rede "observability-network".
+    ports:
+      - "2025:5432"  # Mapeia a porta 5432 do contêiner para a porta 5432 do host.
+
+  postgres-exporter:  # Serviço para o exportador de métricas do PostgreSQL.
+    build:
+      context: ./postgres-exporter  # Especifica o diretório onde está o Dockerfile do exportador.
+    environment:  # Define variáveis de ambiente para configurar a conexão com o banco de dados.
+      DATA_SOURCE_NAME: "uspostgreser:minhasenhasecreta@db:5432/northwind"  # String de conexão com o banco de dados.
+    networks:
+      - observability-network  # Conecta o serviço à rede "observability-network".
+    ports:
+      - "9187:9187"  # Mapeia a porta 9187 do contêiner para a porta 9187 do host.
+
+  prometheus:  # Serviço para o Prometheus.
+    build:
+      context: ./prometheus  # Especifica o diretório onde está o Dockerfile do Prometheus.
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml  # Monta o arquivo de configuração do Prometheus no contêiner.
+    networks:
+      - observability-network  # Conecta o serviço à rede "observability-network".
+    ports:
+      - "9090:9090"  # Mapeia a porta 9090 do contêiner para a porta 9090 do host.
+
+  grafana:  # Serviço para o Grafana.
+    build:
+      context: ./grafana  # Especifica o diretório onde está o Dockerfile do Grafana.
+    networks:
+      - observability-network  # Conecta o serviço à rede "observability-network".
+    ports:
+      - "3000:3000"  # Mapeia a porta 3000 do contêiner para a porta 3000 do host.
+
+volumes:  # Define volumes para persistência de dados.
+  db_data:  # Volume para armazenar os dados do banco de dados PostgreSQL.
+
+networks:  # Define redes para comunicação entre os serviços.
+  observability-network:  # Rede personalizada para conectar todos os serviços.
