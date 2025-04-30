@@ -83,6 +83,6 @@ Agora o dashboard estará disponível para monitorar as métricas do banco de da
 
 Este projeto tem como objetivo fornecer uma solução robusta de observabilidade para monitorar bancos de dados PostgreSQL, facilitando o acompanhamento de desempenho e a resolução de problemas.
 
-## Imagen Dash
+## Imagen Dashboard
 
 ![Fluxo do Projeto](img/dash.PNG)
